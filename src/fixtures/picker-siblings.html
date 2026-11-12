@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: picker-siblings</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      #list { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+      #list .item { padding: 14px; border-radius: 8px; background: #eef; }
+      #b2 { background: #ddf; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>PK1 — picked element keeps identity across sibling reordering (stable id + fingerprint).</p>
+      <div id="list">
+        <div class="item" id="b1">Banner one</div>
+        <div class="item" id="b2">Banner two</div>
+        <div class="item" id="b3">Banner three</div>
+      </div>
+      <button id="reorder">reorder</button>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <script>
+      // Reverse the children so #b2 changes DOM position but keeps its id + text.
+      document.getElementById('reorder').addEventListener('click', () => {
+        const list = document.getElementById('list');
+        const kids = [...list.children].reverse();
+        kids.forEach((k) => list.appendChild(k));
+      });
+    </script>
+  </body>
+</html>

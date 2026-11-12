@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: inline-overflow-lock</title>
+    <link rel="stylesheet" href="_common.css" />
+  </head>
+  <!-- U4 — body carries an INLINE overflow:hidden!important scroll lock. Only an
+       inline setProperty override on the root can beat it. -->
+  <body style="overflow:hidden !important">
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>U4 — inline overflow:hidden!important lock on body → inline-important override unlocks.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+  </body>
+</html>

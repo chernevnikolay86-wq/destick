@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Destick — Kill Sticky",
+  "version": "0.1.0",
+  "description": "One click hides sticky headers, cookie bars, modals, chat bubbles and overlays — and restores scrolling. Reversible, per-site, 100% local.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Destick: clean / undo sticky junk",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "sw.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "permissions": ["storage"],
+  "commands": {
+    "toggle-clean": {
+      "suggested_key": { "default": "Alt+Shift+X" },
+      "description": "Toggle clean / undo sticky junk on this page"
+    },
+    "pick-element": {
+      "suggested_key": { "default": "Alt+Shift+P" },
+      "description": "Pick an element to hide"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "_note": "Sample VALID matrix used only by the release-check self-test (Suite 11 R1). Not the real one.",
+  "matrix": [
+    { "url": "https://edition.cnn.com/sample-article", "category": "news", "browser": "Chrome 140", "viewport": "1280x800", "consent": "accepted", "steps": "load, toggle", "expectedHides": ["sticky header", "cookie"], "functional": "pass", "evidence": "evidence/ev-matrix.txt" },
+    { "url": "https://www.nytimes.com/sample", "category": "news", "browser": "Chrome 140", "viewport": "1280x800", "consent": "accepted", "steps": "load, toggle", "expectedHides": ["subscribe modal"], "functional": "pass", "evidence": "evidence/ev-matrix.txt" },
+    { "url": "https://www.forbes.com/sample", "category": "news", "browser": "Chrome 140", "viewport": "1280x800", "consent": "rejected", "steps": "load, toggle", "expectedHides": ["interstitial"], "functional": "pass", "evidence": "evidence/ev-matrix.txt" },
+    { "url": "https://medium.com/@user/sample", "category": "blog", "browser": "Chrome 140", "viewport": "1280x800", "consent": "n/a", "steps": "load, toggle", "expectedHides": ["sticky top", "bottom bar"], "functional": "pass", "evidence": "evidence/ev-matrix.txt" },
+    { "url": "https://sample.substack.com/p/post", "category": "blog", "browser": "Chrome 140", "viewport": "1280x800", "consent": "n/a", "steps": "load, toggle", "expectedHides": ["subscribe modal"], "functional": "pass", "evidence": "evidence/ev-matrix.txt" },
+    { "url": "https://stackoverflow.com/questions/123", "category": "dev", "browser": "Chrome 140", "viewport": "1280x800", "consent": "accepted", "steps": "load, toggle", "expectedHides": ["sticky header", "join bar"], "functional": "pass", "evidence": "evidence/ev-matrix.txt" },
+    { "url": "https://www.amazon.com/dp/B000SAMPLE", "category": "store", "browser": "Chrome 140", "viewport": "1280x800", "consent": "n/a", "steps": "load, toggle", "expectedHides": ["sticky add-to-cart"], "functional": "pass", "evidence": "evidence/ev-matrix.txt" },
+    { "url": "https://shop.sample-store.com/products/x", "category": "store", "browser": "Chrome 140", "viewport": "1280x800", "consent": "accepted", "steps": "load, toggle", "expectedHides": ["chat", "newsletter"], "functional": "pass", "evidence": "evidence/ev-matrix.txt" },
+    { "url": "https://developer.mozilla.org/en-US/docs/Web", "category": "docs", "browser": "Chrome 140", "viewport": "1280x800", "consent": "n/a", "steps": "load, toggle, undo", "expectedHides": ["good sticky"], "functional": "pass", "evidence": "evidence/ev-matrix.txt", "negativeControl": true },
+    { "url": "https://en.wikipedia.org/wiki/Sample", "category": "control", "browser": "Chrome 140", "viewport": "1280x800", "consent": "n/a", "steps": "load, toggle", "expectedHides": [], "functional": "pass", "evidence": "evidence/ev-matrix.txt", "negativeControl": true }
+  ],
+  "persistence": [
+    { "site": "https://edition.cnn.com", "survivesReload": true, "evidence": "evidence/ev-persist.txt" },
+    { "site": "https://medium.com", "survivesReload": true, "evidence": "evidence/ev-persist.txt" },
+    { "site": "https://stackoverflow.com", "survivesReload": true, "evidence": "evidence/ev-persist.txt" }
+  ],
+  "picker": [
+    { "site": "https://www.forbes.com", "hidesAndRemembers": true, "deleteResetWorks": true, "evidence": "evidence/ev-picker.txt" },
+    { "site": "https://shop.sample-store.com", "hidesAndRemembers": true, "deleteResetWorks": true, "evidence": "evidence/ev-picker.txt" }
+  ],
+  "chromeUiInputs": { "toolbarClick": true, "osShortcut": true, "evidence": "evidence/ev-chrome.txt" }
+}

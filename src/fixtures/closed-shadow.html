@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: closed-shadow</title>
+    <link rel="stylesheet" href="_common.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>F11 — junk inside a CLOSED shadow root → LIMITATION: internal stays, host-level only, no crash.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <div id="host"></div>
+    <script>
+      const root = document.getElementById('host').attachShadow({ mode: 'closed' });
+      root.innerHTML =
+        '<style>#bubble{position:fixed;right:20px;bottom:20px;z-index:2147483000;width:60px;height:60px;border-radius:50%;background:#555;color:#fff;display:flex;align-items:center;justify-content:center}</style>' +
+        '<div id="bubble">C</div>';
+    </script>
+  </body>
+</html>

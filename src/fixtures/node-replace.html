@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: node-replace</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 800; background: #b33; color: #fff; padding: 14px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>F9 — the junk is replaced with a fresh node → observer re-hides; ledger survives.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <div class="bar" id="bar">Promo v1</div>
+    <button id="swap" style="position:fixed;bottom:8px;left:8px;z-index:900">swap</button>
+    <script>
+      document.getElementById('swap').addEventListener('click', () => {
+        const old = document.getElementById('bar');
+        if (old) old.remove();
+        const n = document.createElement('div');
+        n.className = 'bar';
+        n.id = 'bar';
+        n.textContent = 'Promo v2 (replacement)';
+        document.body.appendChild(n);
+      });
+    </script>
+  </body>
+</html>

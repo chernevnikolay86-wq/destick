@@ -1,0 +1,25 @@
+{
+  "_note": "AC-B1 manual publication matrix. nixa fills the real URLs + evidence. release-check intentionally FAILS until every row is pass with an existing evidence file. See docs/RELEASE-CHECK.md.",
+  "matrix": [
+    { "url": "", "category": "news", "browser": "", "viewport": "", "consent": "", "steps": "", "expectedHides": ["sticky header", "video docker", "cookie"], "functional": "PENDING", "evidence": "PENDING" },
+    { "url": "", "category": "news", "browser": "", "viewport": "", "consent": "", "steps": "", "expectedHides": ["sticky nav", "subscribe modal", "consent"], "functional": "PENDING", "evidence": "PENDING" },
+    { "url": "", "category": "news", "browser": "", "viewport": "", "consent": "", "steps": "", "expectedHides": ["interstitial", "sticky bars"], "functional": "PENDING", "evidence": "PENDING" },
+    { "url": "", "category": "blog", "browser": "", "viewport": "", "consent": "", "steps": "", "expectedHides": ["sticky top", "bottom bar", "floating"], "functional": "PENDING", "evidence": "PENDING" },
+    { "url": "", "category": "blog", "browser": "", "viewport": "", "consent": "", "steps": "", "expectedHides": ["subscribe modal", "sticky"], "functional": "PENDING", "evidence": "PENDING" },
+    { "url": "", "category": "dev", "browser": "", "viewport": "", "consent": "", "steps": "", "expectedHides": ["sticky header", "cookie", "join"], "functional": "PENDING", "evidence": "PENDING" },
+    { "url": "", "category": "store", "browser": "", "viewport": "", "consent": "", "steps": "", "expectedHides": ["sticky add-to-cart", "floating"], "functional": "PENDING", "evidence": "PENDING" },
+    { "url": "", "category": "store", "browser": "", "viewport": "", "consent": "", "steps": "", "expectedHides": ["sticky header", "chat", "newsletter"], "functional": "PENDING", "evidence": "PENDING" },
+    { "url": "", "category": "docs", "browser": "", "viewport": "", "consent": "", "steps": "", "expectedHides": ["good sticky (restore via undo)"], "functional": "PENDING", "evidence": "PENDING", "negativeControl": true },
+    { "url": "", "category": "control", "browser": "", "viewport": "", "consent": "", "steps": "", "expectedHides": [], "functional": "PENDING", "evidence": "PENDING", "negativeControl": true }
+  ],
+  "persistence": [
+    { "site": "", "survivesReload": false, "evidence": "PENDING" },
+    { "site": "", "survivesReload": false, "evidence": "PENDING" },
+    { "site": "", "survivesReload": false, "evidence": "PENDING" }
+  ],
+  "picker": [
+    { "site": "", "hidesAndRemembers": false, "deleteResetWorks": false, "evidence": "PENDING" },
+    { "site": "", "hidesAndRemembers": false, "deleteResetWorks": false, "evidence": "PENDING" }
+  ],
+  "chromeUiInputs": { "toolbarClick": false, "osShortcut": false, "evidence": "PENDING" }
+}

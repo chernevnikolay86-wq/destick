@@ -1,0 +1,19 @@
+node_modules/
+dist/
+dist.zip
+test-results/
+playwright-report/
+.playwright/
+*.log
+.DS_Store
+
+# --- internal (orchestrator / workflow) — NOT part of the public repo ---
+# docs/samples/ and tests/ stay IN the repo (CI needs them). These don't:
+.claude/
+.trail/
+AGENTS.md
+PROJECT.md
+tasks/
+versions/
+marketing/
+# demo source media lives in marketing/; the README uses docs/demo.gif (kept).

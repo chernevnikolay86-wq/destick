@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: cap-storm</title>
+    <link rel="stylesheet" href="_common.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <p>DY5 — continuous insertion of fixed junk → re-clean cap trips, badge "⏸".</p>
+      <div class="tall"></div>
+    </main>
+    <script>
+      let n = 0;
+      // fresh fixed node every 120ms → forces repeated observer re-cleans
+      window.__storm = setInterval(() => {
+        const d = document.createElement('div');
+        d.className = 'storm';
+        d.style.cssText = 'position:fixed;top:' + (n % 10) * 10 + 'px;left:0;z-index:777;background:#900;color:#fff;padding:4px';
+        d.textContent = 'junk ' + n++;
+        document.body.appendChild(d);
+      }, 400); // > debounce (250ms) so each insert is its own flush → cap trips
+    </script>
+  </body>
+</html>

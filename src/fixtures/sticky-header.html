@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: sticky-header</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      #nav { position: sticky; top: 0; z-index: 50; background: #111; color: #fff; padding: 14px 20px; }
+    </style>
+  </head>
+  <body>
+    <header id="nav">Sticky navbar (no scroll lock)</header>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>F1 — sticky header, no scroll lock. Clean hides #nav; scrolling already works.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+  </body>
+</html>

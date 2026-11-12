@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: nested-shadow</title>
+    <link rel="stylesheet" href="_common.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>PK8 — junk nested two open-shadow boundaries deep; replay resolves it through the
+        hostChain (#outer › #inner › #deep) at exactly one stable match per step.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <div id="outer"></div>
+    <script>
+      const outer = document.getElementById('outer').attachShadow({ mode: 'open' });
+      outer.innerHTML = '<div id="inner"></div>';
+      const inner = outer.getElementById('inner').attachShadow({ mode: 'open' });
+      // #deep is a NORMAL (non-sticky) element → it is NOT an ordinary detection
+      // candidate; only a persisted hostChain rule can hide it on replay.
+      inner.innerHTML =
+        '<style>#deep{background:#508;color:#fff;padding:12px;border-radius:8px;margin:8px 0}</style>' +
+        '<div id="deep">DEEP</div>';
+    </script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: chat-bubble</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      #chat { position: fixed; right: 20px; bottom: 20px; z-index: 2147483000; width: 64px; height: 64px;
+        border-radius: 50%; background: #0a7; color: #fff; display: flex; align-items: center; justify-content: center; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>F5 — floating chat bubble bottom-right, high stacking → hidden.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <div id="chat">💬</div>
+  </body>
+</html>

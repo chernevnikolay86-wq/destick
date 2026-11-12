@@ -1,0 +1,25 @@
+name: "💡 Feature request"
+description: Suggest an improvement. (Destick stays single-purpose and 100% local by design.)
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: The annoyance or use case behind the request.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Proposed solution
+    validations:
+      required: false
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Fits Destick's scope?
+      description: Destick is a single-purpose, local, no-network sticky/overlay remover. Out of scope by design.
+      options:
+        - label: This does NOT require network access, an account, remote rules, or telemetry.
+        - label: This keeps Destick single-purpose (not an ad blocker / general element-hiding filter list).

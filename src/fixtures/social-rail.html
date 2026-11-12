@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: social-rail</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      #rail { position: fixed; left: 8px; top: 50%; transform: translateY(-50%); z-index: 500;
+        display: flex; flex-direction: column; gap: 10px; }
+      #rail a { width: 40px; height: 40px; border-radius: 8px; background: #345; color: #fff; text-align: center; line-height: 40px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>F6 — fixed social-share side rail → hidden.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <nav id="rail"><a>f</a><a>t</a><a>in</a></nav>
+  </body>
+</html>

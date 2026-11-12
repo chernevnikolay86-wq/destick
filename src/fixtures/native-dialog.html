@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: native-dialog</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      dialog#promo { border: 0; border-radius: 10px; padding: 28px; z-index: 10; }
+      dialog#promo::backdrop { background: rgba(0,0,0,.6); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>F14 — real &lt;dialog&gt;.showModal() + ::backdrop → LIMITATION: visual hide may work via marker, but modal inertness may remain; tested separately; no crash.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <dialog id="promo"><h2>Modal</h2><p>top-layer native dialog</p><button>ok</button></dialog>
+    <script>
+      document.getElementById('promo').showModal();
+    </script>
+  </body>
+</html>

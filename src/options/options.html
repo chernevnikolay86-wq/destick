@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Destick — settings</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --fg: #1b1b22;
+        --muted: #6b6b78;
+        --accent: #6d5ef3;
+        --line: #e6e6ef;
+        --card: #f7f7fb;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        color: var(--fg);
+        background: var(--bg);
+      }
+      main { max-width: 680px; margin: 0 auto; padding: 28px 20px 60px; }
+      h1 { font-size: 20px; margin: 0 0 2px; display: flex; align-items: center; gap: 10px; }
+      h2 { font-size: 15px; margin: 28px 0 10px; }
+      .sub { color: var(--muted); margin: 0 0 18px; }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .site { padding: 12px 0; border-bottom: 1px solid var(--line); }
+      .site:last-child { border-bottom: 0; }
+      .origin { font-weight: 600; word-break: break-all; }
+      button, select, input[type="text"] {
+        font: inherit; border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; background: #fff; color: var(--fg); cursor: pointer;
+      }
+      button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+      button.link { background: none; border: none; color: var(--accent); padding: 4px; cursor: pointer; }
+      .rules { margin: 8px 0 0; padding: 0; list-style: none; }
+      .rules li { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; color: var(--muted); font-size: 13px; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+      .switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+      .note { color: var(--muted); font-size: 13px; }
+      kbd { font-family: ui-monospace, monospace; background: #ececf5; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; font-size: 12px; }
+      .icon { width: 22px; height: 22px; border-radius: 6px; }
+      .add { display: flex; gap: 8px; margin-top: 12px; }
+      .add input { flex: 1; }
+      #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #1b1b22; color: #fff; padding: 8px 14px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+      #toast.show { opacity: 1; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1><img class="icon" src="icons/icon48.png" alt="" /> Destick</h1>
+      <p class="sub">One click hides sticky/fixed/overlay junk and restores scrolling. 100% local — no account, no network, no tracking.</p>
+
+      <h2>Pick an element to hide</h2>
+      <div class="card">
+        <p class="note">Open a normal web page, then pick the stubborn element. It is hidden now and remembered for that site.</p>
+        <div class="row" style="margin-top:10px">
+          <select id="pickTab"><option value="">(no open pages found)</option></select>
+          <button class="primary" id="pickBtn">Start picker</button>
+        </div>
+      </div>
+
+      <h2>Sites</h2>
+      <div class="card" id="sites"><p class="note">No per-site settings yet. Clean a page or add one below.</p></div>
+      <div class="add">
+        <input type="text" id="addOrigin" placeholder="https://example.com" />
+        <button id="addBtn">Add site (auto-clean on)</button>
+      </div>
+
+      <h2>Keyboard shortcuts</h2>
+      <div class="card">
+        <p class="note">Toggle clean / undo: <kbd id="kToggle">Alt+Shift+X</kbd> &nbsp;·&nbsp; Pick element: <kbd id="kPick">Alt+Shift+P</kbd></p>
+        <p class="note">Unassigned or want to change them? Open <span class="mono">chrome://extensions/shortcuts</span> (copy &amp; paste into the address bar).</p>
+      </div>
+
+      <h2>Privacy</h2>
+      <div class="card">
+        <p class="note">Destick does not initiate any outbound request or send any data anywhere. Everything (your per-site choices and picked elements) stays on this device in local extension storage. The content script has broad page access because it must run on load to hide junk before you see it — but it never transmits anything.</p>
+        <p class="note">Hiding an element removes it visually and stops it intercepting clicks/focus. It does not stop that element's scripts/network and does not record cookie consent for you.</p>
+      </div>
+    </main>
+    <div id="toast"></div>
+    <script src="options.js"></script>
+  </body>
+</html>

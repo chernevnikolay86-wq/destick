@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: marker-both</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      #docjunk { position: fixed; top: 0; left: 0; right: 0; z-index: 900; background: #b33; color: #fff; padding: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>DY3d — a document candidate AND an open-shadow candidate; the page later REPLACES our
+        marker with its own value in both contexts → relinquish (no repair, Undo keeps page value).</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <div id="docjunk">document-level junk</div>
+    <div id="host"></div>
+    <script>
+      const root = document.getElementById('host').attachShadow({ mode: 'open' });
+      root.innerHTML =
+        '<style>#bubble{position:fixed;right:20px;bottom:20px;z-index:2147483000;width:60px;height:60px;border-radius:50%;background:#e55;color:#fff}</style>' +
+        '<div id="bubble">S</div>';
+    </script>
+  </body>
+</html>

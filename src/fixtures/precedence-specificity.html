@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: precedence-specificity</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      /* P2 — a high-specificity !important page rule forces the junk visible.
+         Only an inline-important override (which always beats an author selector)
+         can hide it. */
+      html body div#bar.stub { display: block !important; position: fixed; top: 0; left: 0; right: 0;
+        z-index: 900; background: #b33; color: #fff; padding: 14px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>P2 — higher-specificity !important page rule; inline-important fallback must still win.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <div id="bar" class="stub">stubborn high-specificity bar</div>
+  </body>
+</html>

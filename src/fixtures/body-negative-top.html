@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: body-negative-top</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      /* classic negative-top scroll lock (iOS pattern) */
+      body { position: fixed; top: -500px; left: 0; right: 0; }
+      #ruler { position: absolute; top: 500px; left: 0; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>F8 — negative-top fixed body lock. body is NEVER hidden; unlock + scroll restore.</p>
+      <div id="ruler" data-marker="at-500">marker at y=500</div>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+  </body>
+</html>

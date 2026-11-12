@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: precedence-layer</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      /* P3 — an @layer-ed !important declaration. Inline !important lives outside
+         the layer cascade and must still beat it. */
+      #bar { position: fixed; top: 0; left: 0; right: 0; z-index: 900; background: #337; color: #fff; padding: 14px; }
+      @layer promo {
+        #bar { display: block !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>P3 — @layer-ed !important declaration; inline-important fallback must still win.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <div id="bar">stubborn @layer bar</div>
+  </body>
+</html>

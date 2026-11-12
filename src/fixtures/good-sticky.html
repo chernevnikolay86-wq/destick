@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: good-sticky</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      .layout { display: flex; max-width: 960px; margin: 0 auto; gap: 20px; padding: 24px; }
+      #sidebar { position: sticky; top: 16px; align-self: flex-start; width: 220px; z-index: 5;
+        background: #f3f3fb; border: 1px solid #ddd; border-radius: 8px; padding: 14px; }
+      #doc { flex: 1; }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside id="sidebar">Legit docs sidebar (a GOOD sticky). Aggressive mode hides it; Undo must restore it identically.</aside>
+      <article id="doc">
+        <h1>Docs</h1>
+        <a id="target-link" href="#end">Jump to end</a>
+        <p>F15 — legitimate sticky navigation. Aggressively hidden (accepted by contract); Undo returns extension-owned changes identically.</p>
+        <div class="tall"></div>
+        <p id="end">The end.</p>
+      </article>
+    </div>
+  </body>
+</html>

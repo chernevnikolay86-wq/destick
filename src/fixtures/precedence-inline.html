@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: precedence-inline</title>
+    <link rel="stylesheet" href="_common.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>P1 — the junk carries inline display:block!important; only an inline-important override can hide it.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <!-- inline !important beats our injected attribute stylesheet rule -->
+    <div id="bar" style="position:fixed;top:0;left:0;right:0;z-index:900;background:#b33;color:#fff;padding:14px;display:block !important">
+      stubborn inline-important bar
+    </div>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: newsletter-modal</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      body.locked { overflow: hidden; }
+      #backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.6); }
+      #modal { position: fixed; z-index: 1001; top: 50%; left: 50%; transform: translate(-50%,-50%);
+        width: 360px; background: #fff; padding: 28px; border-radius: 10px; }
+    </style>
+  </head>
+  <body class="locked">
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>F3 — newsletter modal + backdrop + body{overflow:hidden} → hidden + unlock.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <div id="backdrop"></div>
+    <div id="modal"><h2>Subscribe!</h2><input placeholder="email" /><button>Join</button></div>
+  </body>
+</html>

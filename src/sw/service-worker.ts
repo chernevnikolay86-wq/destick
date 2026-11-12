@@ -1,0 +1,116 @@
+// Service worker — stateless router (§Permissions, §State model).
+// No live state kept in globals; badge is reconstructed by asking the content
+// script. Needs only tab IDs (no `tabs` permission) to route messages.
+import type {
+  ContentToSw,
+  OptionsToSw,
+  RegistryEntry,
+  SwToContent,
+  WhoamiResponse,
+} from '../core/messages';
+import type { EngineStatus } from '../core/types';
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.action.setBadgeBackgroundColor({ color: '#6d5ef3' });
+});
+// also set on startup (SW wake)
+chrome.action.setBadgeBackgroundColor({ color: '#6d5ef3' });
+
+/* ----------------------- toolbar + keyboard entry ----------------------- */
+chrome.action.onClicked.addListener((tab) => {
+  if (tab.id != null) sendToTab(tab.id, { ks: 'toggle' });
+});
+
+chrome.commands.onCommand.addListener(async (command) => {
+  const tabId = await activeTabId();
+  if (tabId == null) return;
+  if (command === 'toggle-clean') sendToTab(tabId, { ks: 'toggle' });
+  else if (command === 'pick-element') sendToTab(tabId, { ks: 'pick' });
+});
+
+/* ------------------------------ messaging ------------------------------ */
+chrome.runtime.onMessage.addListener((raw: unknown, sender, sendResponse) => {
+  const msg = raw as ContentToSw | OptionsToSw;
+
+  // Options-page requests. options_ui.open_in_tab=true means the options page runs
+  // in a TAB too, so it ALSO carries sender.tab — route these by message type, never
+  // by the absence of sender.tab (that bug made the picker chooser a no-op).
+  if (msg?.ks === 'getRegistry') {
+    void buildRegistry().then((entries) => sendResponse(entries));
+    return true;
+  }
+  if (msg?.ks === 'focusAndPick') {
+    void focusAndPick(msg.tabId, msg.windowId).then((ok) => sendResponse({ ok }));
+    return true;
+  }
+
+  // Content-script messages: badge updates (sender.tab is the reporting tab).
+  // 'hello' is informational; the registry is rebuilt on demand (stateless SW).
+  if (sender.tab?.id != null && msg?.ks === 'badge') {
+    updateBadge(sender.tab.id, msg.status);
+  }
+  return false;
+});
+
+/* ------------------------------- helpers ------------------------------- */
+function sendToTab(tabId: number, msg: SwToContent): void {
+  chrome.tabs.sendMessage(tabId, msg).catch(() => {
+    // No content script on this tab (opened before install / restricted / withheld
+    // access). Surface the shared, generic fallback in the only no-permission surface
+    // we have — badge + title — rather than silently doing nothing.
+    chrome.action.setBadgeText({ tabId, text: '!' }).catch(() => {});
+    chrome.action
+      .setTitle({ tabId, title: 'Destick has no access on this page — reload it, then try again.' })
+      .catch(() => {});
+  });
+}
+
+async function activeTabId(): Promise<number | null> {
+  try {
+    const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    return tabs[0]?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function updateBadge(tabId: number, status: EngineStatus): void {
+  let text = '';
+  if (status.capped) text = '⏸';
+  else if (status.state === 'cleaned') text = status.count > 0 ? String(status.count) : '✓';
+  chrome.action.setBadgeText({ tabId, text }).catch(() => {});
+}
+
+/** Discover http(s) tabs that have our content script, via tab IDs only. */
+async function buildRegistry(): Promise<RegistryEntry[]> {
+  const out: RegistryEntry[] = [];
+  let tabs: chrome.tabs.Tab[];
+  try {
+    tabs = await chrome.tabs.query({});
+  } catch {
+    return out;
+  }
+  await Promise.all(
+    tabs.map(async (t) => {
+      if (t.id == null || t.windowId == null) return;
+      try {
+        const r = (await chrome.tabs.sendMessage(t.id, { ks: 'whoami' })) as WhoamiResponse;
+        if (r?.supported) out.push({ tabId: t.id, windowId: t.windowId, origin: r.origin });
+      } catch {
+        /* restricted / no content script */
+      }
+    }),
+  );
+  return out;
+}
+
+async function focusAndPick(tabId: number, windowId: number): Promise<boolean> {
+  try {
+    await chrome.tabs.update(tabId, { active: true });
+    await chrome.windows.update(windowId, { focused: true });
+    await chrome.tabs.sendMessage(tabId, { ks: 'pick' } satisfies SwToContent);
+    return true;
+  } catch {
+    return false;
+  }
+}

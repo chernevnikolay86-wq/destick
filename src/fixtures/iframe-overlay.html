@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: iframe-overlay</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      #ad { position: fixed; right: 16px; bottom: 16px; z-index: 9000; width: 300px; height: 250px; border: 0; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>F12 — overlay is an &lt;iframe&gt; element → the iframe element is hidden; its internal content is NOT cleaned (limitation).</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <iframe id="ad" srcdoc="<body style='margin:0;background:#c33;color:#fff;font:16px sans-serif;display:flex;align-items:center;justify-content:center'>AD</body>"></iframe>
+  </body>
+</html>

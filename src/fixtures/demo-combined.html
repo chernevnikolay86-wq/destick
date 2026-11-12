@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>The Daily Scroll — How we lost the web to sticky junk</title>
+    <style>
+      * { box-sizing: border-box; }
+      /* 46px gap at the very top is where the recorder paints a faux browser toolbar */
+      body { margin: 0; padding-top: 46px; font: 17px/1.7 Georgia, 'Times New Roman', serif; color: #1a1a1a; background: #fff; }
+      body.locked { overflow: hidden; }
+      #nav { position: sticky; top: 46px; z-index: 50; background: #0b1220; color: #fff; padding: 16px 22px;
+        display: flex; justify-content: space-between; align-items: center; font-family: system-ui, sans-serif; }
+      #nav .logo { font-weight: 800; letter-spacing: .5px; }
+      #nav .links span { margin-left: 18px; opacity: .85; font-size: 14px; }
+      article { max-width: 680px; margin: 0 auto; padding: 36px 24px 80px; }
+      h1 { font-size: 34px; line-height: 1.2; margin: 0 0 8px; }
+      .byline { color: #777; font-family: system-ui, sans-serif; font-size: 14px; margin-bottom: 26px; }
+      p { margin: 0 0 20px; }
+      #cookie { position: fixed; left: 0; right: 0; bottom: 0; z-index: 9999; background: #111; color: #fff;
+        padding: 16px 22px; display: flex; justify-content: space-between; align-items: center;
+        font-family: system-ui, sans-serif; font-size: 14px; }
+      #cookie button { background: #6d5ef3; color: #fff; border: 0; border-radius: 6px; padding: 9px 16px; font: inherit; cursor: pointer; }
+      #backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(5,8,20,.72); }
+      #modal { position: fixed; z-index: 1001; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 400px; max-width: 90vw; background: #fff; border-radius: 14px; padding: 34px; text-align: center;
+        font-family: system-ui, sans-serif; box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+      #modal h2 { margin: 0 0 8px; font-size: 24px; }
+      #modal p { color: #666; font-size: 15px; }
+      #modal input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font: inherit; margin: 12px 0; }
+      #modal button { width: 100%; background: #6d5ef3; color: #fff; border: 0; border-radius: 8px; padding: 13px; font: inherit; font-weight: 600; cursor: pointer; }
+      #chat { position: fixed; right: 22px; bottom: 92px; z-index: 2147482000; width: 62px; height: 62px;
+        border-radius: 50%; background: #0a7d55; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+      #rail { position: fixed; left: 10px; top: 42%; transform: translateY(-50%); z-index: 500;
+        display: flex; flex-direction: column; gap: 10px; font-family: system-ui, sans-serif; }
+      #rail a { width: 42px; height: 42px; border-radius: 10px; background: #263142; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    </style>
+  </head>
+  <body class="locked">
+    <header id="nav">
+      <span class="logo">THE DAILY SCROLL</span>
+      <span class="links"><span>World</span><span>Tech</span><span>Opinion</span><span>Subscribe</span></span>
+    </header>
+
+    <article>
+      <h1>How we quietly lost the web to sticky junk</h1>
+      <div class="byline">By A. Reader · 7 min read</div>
+      <p>You came here to read one thing. Instead, a header follows you down the page, a
+        cookie bar squats at the bottom, a modal begs for your email, and a chat bubble
+        waves from the corner. Worst of all — the page won't even scroll.</p>
+      <p>It wasn't always like this. The modern article is a thin column of text wrapped in
+        three layers of interruption, each one "just one tap" to dismiss, none of them
+        staying dismissed.</p>
+      <p>What if one click could strip all of it away and simply give you the page back —
+        and give it back exactly as it was the moment you changed your mind?</p>
+      <p>Below the fold there is more writing like this: calm, readable, uninterrupted.
+        The kind of page the web was supposed to be before every surface became a
+        placement.</p>
+      <p>Keep scrolling. There is nothing in your way now.</p>
+      <p>More text continues here so the scroll is long and obvious during the demo, line
+        after line, paragraph after paragraph, proving the page moves freely once the
+        junk is gone.</p>
+      <p>And still more, because a good demo shows real reading, not a jump cut. The column
+        glides; the header is gone; the bars are gone; the modal is gone.</p>
+      <p>The end — or the beginning, depending on whether you kept the junk.</p>
+    </article>
+
+    <nav id="rail"><a>f</a><a>X</a><a>in</a><a>✉</a></nav>
+    <div id="chat">💬</div>
+    <div id="cookie"><span>We use cookies and 1,412 partners to store and access information on your device.</span><button>Accept all</button></div>
+    <div id="backdrop"></div>
+    <div id="modal">
+      <h2>Don't miss a thing</h2>
+      <p>Join 400,000 readers. Unsubscribe anytime.</p>
+      <input placeholder="you@example.com" />
+      <button>Subscribe now</button>
+    </div>
+  </body>
+</html>

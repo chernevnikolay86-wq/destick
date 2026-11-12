@@ -1,0 +1,43 @@
+name: "🌐 Site report (Destick misbehaves on a page)"
+description: A site where junk isn't hidden, scroll stays locked, or something legit got hidden.
+labels: ["site-report"]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: Page URL
+      description: The exact page (a public one we can open helps a lot).
+      placeholder: https://example.com/article
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What happened?
+      options:
+        - Junk was NOT hidden (something stayed)
+        - Scrolling stayed locked after cleaning
+        - Something legitimate got hidden
+        - Undo didn't fully restore the page
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Which element? Did the element picker (Alt+Shift+P) help? Any console errors?
+    validations:
+      required: false
+  - type: input
+    id: chrome
+    attributes:
+      label: Browser & version
+      placeholder: Chrome 140 on macOS
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before filing
+      options:
+        - label: I tried clicking again (undo) and re-cleaning.
+        - label: I checked this isn't a documented limitation (iframe-internal, closed shadow root, native dialog inertness) in the README.

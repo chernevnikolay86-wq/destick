@@ -1,0 +1,8 @@
+/* shared fixture styling — tall content so scrolling is meaningful */
+* { box-sizing: border-box; }
+body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: #222; }
+main { max-width: 760px; margin: 0 auto; padding: 24px; }
+main p { margin: 0 0 18px; }
+.tall { height: 2400px; background: linear-gradient(#fff, #eef); padding-top: 12px; }
+#target-link { display: inline-block; margin: 8px 0; padding: 8px 12px; background: #6d5ef3; color: #fff; text-decoration: none; border-radius: 6px; }
+h1 { margin: 8px 0; }

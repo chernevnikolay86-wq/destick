@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: newsletter-delayed</title>
+    <link rel="stylesheet" href="_common.css" />
+    <style>
+      #modal { position: fixed; z-index: 1001; top: 50%; left: 50%; transform: translate(-50%,-50%);
+        width: 360px; background: #fff; padding: 28px; border-radius: 10px; box-shadow: 0 0 0 100vmax rgba(0,0,0,.6); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Article</h1>
+      <a id="target-link" href="#end">Jump to end</a>
+      <p>F4 — modal inserted 1.5s after load → observer catches it.</p>
+      <div class="tall"></div>
+      <p id="end">The end.</p>
+    </main>
+    <script>
+      setTimeout(() => {
+        const m = document.createElement('div');
+        m.id = 'modal';
+        m.innerHTML = '<h2>Subscribe!</h2><input placeholder="email" /><button>Join</button>';
+        document.body.appendChild(m);
+        document.body.style.overflow = 'hidden';
+      }, 1500);
+    </script>
+  </body>
+</html>
