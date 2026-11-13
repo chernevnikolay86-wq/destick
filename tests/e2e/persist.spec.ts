@@ -14,6 +14,8 @@ import {
   routeToggle,
   tabIdOf,
   seedPrefs,
+  readPrefs,
+  readAction,
 } from './ext';
 
 test('S1 — autoClean=on survives reload (junk auto-hidden after load)', async ({ page, sw, baseURL }) => {
@@ -109,4 +111,83 @@ test('S10 — reconstruction-on-demand: Options chooser lists eligible tabs with
   expect(origins).toContain(baseURL);
   await opt.close();
   await pageB.close();
+});
+
+// NEW behavior (sticky-state): a single toggle is no longer ephemeral — it persists the
+// resulting clean-state for the origin, so the EXISTING startup contract auto-cleans every
+// later page on that site. This is nixa's exact automedia.bg case: clean once, keep clean.
+test('S11 — one toggle makes the clean sticky across navigation; a 2nd toggle (undo) stops it', async ({ page, sw, baseURL }) => {
+  await openFixture(page, baseURL, 'cookie-bar.html');
+  expect((await readPrefs(sw, baseURL))?.autoClean ?? false).toBe(false); // starts off
+
+  // CLEAN → autoClean persisted true, and the hidden junk's selector captured for pre-hide
+  const on = await toggle(sw, page);
+  expect(on.state).toBe('cleaned');
+  await expect(page.locator('#cookie')).toBeHidden();
+  const afterClean = await readPrefs(sw, baseURL);
+  expect(afterClean?.autoClean).toBe(true);
+  expect(afterClean?.preHideSelectors).toContain('#cookie'); // §flash: remembered for next load
+
+  // Navigate to the SAME-origin page again (a reload stands in for "another article"):
+  // it must load ALREADY clean, with NO second click.
+  await page.reload();
+  await page.waitForLoadState('domcontentloaded');
+  await expect(page.locator('#cookie')).toBeHidden(); // survived navigation via autoClean
+  expect((await getState(sw, page)).state).toBe('cleaned');
+
+  // 2nd toggle = UNDO → autoClean persisted false → junk comes back on the next load
+  const off = await toggle(sw, page);
+  expect(off.state).toBe('off');
+  const afterUndo = await readPrefs(sw, baseURL);
+  expect(afterUndo?.autoClean).toBe(false);
+  expect(afterUndo?.preHideSelectors).toEqual([]); // §flash: hint cleared on undo
+  await page.reload();
+  await page.waitForLoadState('domcontentloaded');
+  await expect(page.locator('#cookie')).toBeVisible(); // auto-clean is off again
+});
+
+test('S12 — ON/OFF visualization: badge reads the STATE word, count lives in the tooltip', async ({ page, sw, baseURL }) => {
+  await openFixture(page, baseURL, 'cookie-bar.html');
+  const tabId = await tabIdOf(sw, page);
+
+  // Fresh eligible page, never toggled → explicit "OFF" badge on grey (never a blank badge).
+  await expect.poll(async () => (await readAction(sw, tabId)).text).toBe('OFF');
+  {
+    const off = await readAction(sw, tabId);
+    expect(off.title).toContain('OFF');
+    expect(off.color).toEqual([0x6b, 0x72, 0x80, 0xff]); // grey #6b7280
+  }
+
+  // CLEAN → "ON" badge on green; the hidden COUNT is only in the tooltip, not the badge.
+  await toggle(sw, page);
+  await expect.poll(async () => (await readAction(sw, tabId)).text).toBe('ON');
+  {
+    const on = await readAction(sw, tabId);
+    expect(on.title).toMatch(/ON — \d+ скрити/); // count moved into the tooltip
+    expect(on.color).toEqual([0x16, 0xa3, 0x4a, 0xff]); // green #16a34a
+  }
+
+  // UNDO → back to the "OFF" badge.
+  await toggle(sw, page);
+  await expect.poll(async () => (await readAction(sw, tabId)).text).toBe('OFF');
+});
+
+test('S13 — pre-hide (§flash): a remembered selector hides remembered junk before the engine runs; undo reveals it', async ({ page, sw, baseURL }) => {
+  // Seed autoClean + a pre-hide selector pointing at a BENIGN element the heuristic never
+  // hides (clean-page is the negative control). So if #end ends up hidden, it can only be
+  // the pre-paint <style> guard — proving the guard works independently of the engine.
+  await seedPrefs(sw, baseURL, { autoClean: true, pickedRules: [], preHideSelectors: ['#end'] });
+  await openFixture(page, baseURL, 'clean-page.html');
+
+  await expect(page.locator('#end')).toBeHidden(); // hidden purely by the pre-paint guard
+  expect(await page.evaluate(() => !!document.getElementById('ks-prehide'))).toBe(true);
+  // the guard is our own node → the engine's detection must ignore it
+  expect(await page.evaluate(() => document.getElementById('ks-prehide')!.hasAttribute('data-ks-ui'))).toBe(true);
+
+  // UNDO drops the guard → the benign element reappears, state OFF persisted.
+  const off = await toggle(sw, page);
+  expect(off.state).toBe('off');
+  await expect(page.locator('#end')).toBeVisible();
+  expect(await page.evaluate(() => !!document.getElementById('ks-prehide'))).toBe(false);
+  expect((await readPrefs(sw, baseURL))?.autoClean).toBe(false);
 });

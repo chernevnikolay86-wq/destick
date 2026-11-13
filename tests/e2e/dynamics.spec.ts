@@ -1,6 +1,6 @@
 // Suite 5 — Dynamics (AC-A6): delayed insert, node replacement, style/marker
 // repair, owned-prop + marker relinquish, self-mutation, cap, pre-DCL insert.
-import { test, expect, toggle, getState, openFixture, seedPrefs } from './ext';
+import { test, expect, toggle, getState, openFixture, seedPrefs, readPrefs } from './ext';
 
 test('DY1 — delayed modal (1.5s) is caught by the observer', async ({ page, sw, baseURL }) => {
   await openFixture(page, baseURL, 'newsletter-delayed.html');
@@ -126,4 +126,19 @@ test('DY6 — candidate present before DOMContentLoaded (auto-clean) is covered'
   await seedPrefs(sw, baseURL, { autoClean: true, pickedRules: [] });
   await openFixture(page, baseURL, 'newsletter-modal.html');
   await expect(page.locator('#modal')).toBeHidden({ timeout: 5000 });
+});
+
+// NEW behavior (sticky-state): a plain toggle persists autoClean, so a reloaded page not
+// only loads clean but RE-ARMS the observer — a modal injected 1.5s AFTER the reload (no
+// click) must still be caught. Proves the sticky clean is live, not a one-shot static hide.
+test('DY7 — sticky clean survives reload AND re-arms the observer for later dynamic junk', async ({ page, sw, baseURL }) => {
+  await openFixture(page, baseURL, 'newsletter-delayed.html');
+  const s = await toggle(sw, page); // one click → autoClean persisted true
+  expect(s.state).toBe('cleaned');
+  expect((await readPrefs(sw, baseURL))?.autoClean).toBe(true);
+
+  await page.reload(); // "open another article" — no click this time
+  await page.waitForLoadState('domcontentloaded');
+  expect((await getState(sw, page)).state).toBe('cleaned'); // auto-cleaned on load
+  await expect(page.locator('#modal')).toBeHidden({ timeout: 6000 }); // delayed modal still caught
 });

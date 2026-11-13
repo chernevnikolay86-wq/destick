@@ -144,7 +144,7 @@ export function extId(sw: Worker): string {
 export async function seedPrefs(
   sw: Worker,
   origin: string,
-  prefs: { autoClean: boolean; pickedRules: unknown[] },
+  prefs: { autoClean: boolean; pickedRules: unknown[]; preHideSelectors?: string[] },
 ): Promise<void> {
   await sw.evaluate(
     async ({ origin, prefs }) => {
@@ -189,6 +189,29 @@ export async function getTimings(
 export async function tabIdOf(sw: Worker, page: Page): Promise<number> {
   await page.bringToFront();
   return activeTabId(sw);
+}
+
+/** Read durable per-origin prefs straight from chrome.storage.local (what a toggle persists). */
+export async function readPrefs(
+  sw: Worker,
+  origin: string,
+): Promise<{ autoClean: boolean; pickedRules: unknown[] } | undefined> {
+  return (await sw.evaluate(async (o) => {
+    const got = await chrome.storage.local.get(`site:${o}`);
+    return got[`site:${o}`];
+  }, origin)) as { autoClean: boolean; pickedRules: unknown[] } | undefined;
+}
+
+/** Read the toolbar action's per-tab visualization (badge text/color + dynamic title). */
+export async function readAction(
+  sw: Worker,
+  tabId: number,
+): Promise<{ text: string; title: string; color: number[] }> {
+  return (await sw.evaluate(async (id) => ({
+    text: await chrome.action.getBadgeText({ tabId: id }),
+    title: await chrome.action.getTitle({ tabId: id }),
+    color: (await chrome.action.getBadgeBackgroundColor({ tabId: id })) as unknown as number[],
+  }), tabId)) as { text: string; title: string; color: number[] };
 }
 
 /** Open the REAL Options page and wait for its picker chooser to populate. */

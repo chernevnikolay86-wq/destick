@@ -13,7 +13,16 @@ export interface ObserverHost {
 }
 
 export interface ObserverBudget {
+  /** trailing delay used while the page is actively churning (coalesces bursts). */
   debounce: number;
+  /**
+   * leading delay for the FIRST flush after a quiet gap — ~1 frame — so a freshly injected
+   * overlay (e.g. a late cookie/consent wall) is removed almost immediately instead of
+   * flashing for a full `debounce` (§flash).
+   */
+  leading: number;
+  /** a mutation arriving this long after our last reconcile counts as "after quiet" → leading. */
+  quietGap: number;
   maxWait: number;
   /** cap on effective re-clean executions (didWork) per window — the spec's "20 re-cleans". */
   cap: number;
@@ -24,6 +33,8 @@ export interface ObserverBudget {
 
 export const DEFAULT_BUDGET: ObserverBudget = {
   debounce: 250,
+  leading: 16,
+  quietGap: 400,
   maxWait: 1000,
   cap: 20,
   scanCap: 60,
@@ -35,6 +46,7 @@ export class Observer {
   private buffer: MutationRecord[] = [];
   private timer: ReturnType<typeof setTimeout> | undefined;
   private firstBufferedAt = 0;
+  private lastFlushAt = 0;
   private execTimes: number[] = [];
   private scanTimes: number[] = [];
   private capped = false;
@@ -52,6 +64,7 @@ export class Observer {
     this.capped = false;
     this.execTimes = [];
     this.scanTimes = [];
+    this.lastFlushAt = 0; // first junk after clean counts as "after quiet" → leading flush
     this.observeAll();
   }
 
@@ -103,9 +116,17 @@ export class Observer {
   }
 
   private schedule(): void {
-    if (this.timer) clearTimeout(this.timer);
-    const waited = Date.now() - this.firstBufferedAt;
-    const delay = Math.max(0, Math.min(this.budget.debounce, this.budget.maxWait - waited));
+    // Fixed cadence, NOT reset-on-mutation: a pending flush is never pushed back by newer
+    // records, so a burst that starts after quiet still fires ~1 frame in (no 250ms flash).
+    if (this.timer) return;
+    const now = Date.now();
+    const waited = now - this.firstBufferedAt;
+    // After a quiet gap (page settled since our last reconcile) run the FIRST flush on the
+    // leading edge; under sustained churn fall back to the debounce so bursts coalesce and
+    // the cap still bounds CPU. maxWait caps the longest a record can wait.
+    const quiet = now - this.lastFlushAt > this.budget.quietGap;
+    const base = quiet ? this.budget.leading : this.budget.debounce;
+    const delay = Math.max(0, Math.min(base, Math.max(0, this.budget.maxWait - waited)));
     this.timer = setTimeout(() => this.flush(), delay);
   }
 
@@ -117,6 +138,7 @@ export class Observer {
     }
     const recs = this.buffer;
     this.buffer = [];
+    this.lastFlushAt = Date.now();
     const didWork = this.host.reconcile(recs);
     this.countExecution(didWork);
   }

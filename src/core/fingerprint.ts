@@ -134,6 +134,52 @@ function uniqueIn(root: Document | ShadowRoot, selector: string): boolean {
   }
 }
 
+const CLASS_RE = /^[A-Za-z][\w-]{2,}$/;
+
+/**
+ * A document-scope selector safe to drop into a pre-paint `<style>` to hide this element
+ * on the NEXT load before it ever paints (§flash). Looser than stableSelector: after a
+ * unique id / data-* / aria-label it also accepts a UNIQUE, well-formed class token —
+ * CMP overlays (e.g. `.fc-consent-root`, OneTrust) carry no id but a stable class.
+ * Only top-light-DOM elements qualify (a document `<style>` can't reach shadow roots).
+ * Uniqueness is checked at capture time; the engine remains the live safety net, and the
+ * pre-hide layer is dropped on undo, so a rare stale selector is reversible.
+ */
+export function preHideSelector(el: Element): string | null {
+  const doc = el.ownerDocument;
+  if (!doc || el.getRootNode() !== doc) return null; // shadow / detached → skip
+  const uniq = (sel: string): boolean => {
+    try {
+      return doc.querySelectorAll(sel).length === 1;
+    } catch {
+      return false;
+    }
+  };
+  const id = el.getAttribute('id');
+  if (id && ID_RE.test(id)) {
+    const sel = `#${cssEscape(id)}`;
+    if (uniq(sel)) return sel;
+  }
+  const tag = el.tagName.toLowerCase();
+  const attrs = el.attributes;
+  for (let i = 0; i < attrs.length; i++) {
+    const name = attrs[i].name;
+    if (name.startsWith('data-ks-')) continue;
+    if (name.startsWith('data-') || name === 'aria-label') {
+      const sel = `${tag}[${name}="${cssEscapeAttr(attrs[i].value)}"]`;
+      if (uniq(sel)) return sel;
+    }
+  }
+  const cls = typeof el.className === 'string' ? el.className : '';
+  for (const c of cls.trim().split(/\s+/)) {
+    if (CLASS_RE.test(c)) {
+      const sel = `.${cssEscape(c)}`;
+      if (uniq(sel)) return sel;
+    }
+  }
+  return null;
+}
+
 /* ---------------------------- rule build/replay ------------------------- */
 
 /**

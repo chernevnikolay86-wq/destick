@@ -10,11 +10,30 @@ import type {
 } from '../core/messages';
 import type { EngineStatus } from '../core/types';
 
+// ON/OFF visualization (§State model): the toolbar must show at a glance whether
+// Destick is active for the current site. Driven entirely off the content script's
+// {ks:'badge'} reports — the SW stays stateless.
+const COLOR_ON = '#16a34a'; // green = cleaned / active
+const COLOR_OFF = '#6b7280'; // slate grey = inactive (white text contrasts)
+const COLOR_CAP = '#d97706'; // amber = paused (mutation cap tripped)
+const ICON_ON: Record<number, string> = {
+  16: 'icons/icon16.png',
+  32: 'icons/icon32.png',
+  48: 'icons/icon48.png',
+  128: 'icons/icon128.png',
+};
+const ICON_OFF: Record<number, string> = {
+  16: 'icons/icon16-off.png',
+  32: 'icons/icon32-off.png',
+  48: 'icons/icon48-off.png',
+  128: 'icons/icon128-off.png',
+};
+
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.action.setBadgeBackgroundColor({ color: '#6d5ef3' });
+  chrome.action.setBadgeBackgroundColor({ color: COLOR_ON });
 });
 // also set on startup (SW wake)
-chrome.action.setBadgeBackgroundColor({ color: '#6d5ef3' });
+chrome.action.setBadgeBackgroundColor({ color: COLOR_ON });
 
 /* ----------------------- toolbar + keyboard entry ----------------------- */
 chrome.action.onClicked.addListener((tab) => {
@@ -75,10 +94,33 @@ async function activeTabId(): Promise<number | null> {
 }
 
 function updateBadge(tabId: number, status: EngineStatus): void {
-  let text = '';
-  if (status.capped) text = '⏸';
-  else if (status.state === 'cleaned') text = status.count > 0 ? String(status.count) : '✓';
+  const on = status.state === 'cleaned';
+  // nixa's choice: the badge must read the STATE word (ON/OFF), never the element count —
+  // a bare number ("1" here, "2" there) didn't tell on/off apart. The count lives in the
+  // tooltip only. "OFF" is shown explicitly (not an empty badge) so state is always visible.
+  let text: string;
+  let color: string;
+  let title: string;
+  if (status.capped) {
+    // capped only ever happens while cleaned (the observer runs only when ON).
+    text = '⏸';
+    color = COLOR_CAP;
+    title = 'Destick: ON (на пауза — твърде много промени по страницата). Клик = върни.';
+  } else if (on) {
+    text = 'ON';
+    color = COLOR_ON;
+    title = `Destick: ON — ${status.count} скрити. Клик = върни.`;
+  } else {
+    text = 'OFF';
+    color = COLOR_OFF;
+    title = 'Destick: OFF — клик = изчисти сайта.';
+  }
+  // Three mutually-reinforcing signals: the ON/OFF badge word+color, the dynamic tooltip
+  // (which carries the count), and the colored "on" vs muted-grey "off" toolbar icon.
   chrome.action.setBadgeText({ tabId, text }).catch(() => {});
+  chrome.action.setBadgeBackgroundColor({ tabId, color }).catch(() => {});
+  chrome.action.setTitle({ tabId, title }).catch(() => {});
+  chrome.action.setIcon({ tabId, path: on ? ICON_ON : ICON_OFF }).catch(() => {});
 }
 
 /** Discover http(s) tabs that have our content script, via tab IDs only. */

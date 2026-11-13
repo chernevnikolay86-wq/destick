@@ -6,8 +6,10 @@ import { classify, filterOutermost, type CandidateInput } from './detect';
 import { classifyRootLock, hasLock } from './unlock';
 import { Ledger } from './ledger';
 import { Observer, type ObserverHost } from './observer';
-import { buildRule, replayRule } from './fingerprint';
+import { buildRule, replayRule, preHideSelector } from './fingerprint';
 import type { CleanState, EngineStatus, Rule } from './types';
+
+const PRE_HIDE_CAP = 40;
 
 const UI_ATTR = 'data-ks-ui'; // our own picker UI nodes — never candidates
 
@@ -25,6 +27,9 @@ export class Engine implements ObserverHost {
   private styleByRoot = new Map<Document | ShadowRoot, HTMLStyleElement>();
   private shadowRoots = new Set<ShadowRoot>();
   private rules: Rule[] = [];
+  // Document-scope selectors of top-level junk hidden this session — persisted so the
+  // next load can pre-hide them before first paint (§flash). Best-effort, capped.
+  private preHide = new Set<string>();
 
   // perf (§Performance baseline) — synchronous-pass timings, read via getTimings().
   private lastCleanMs = 0;
@@ -70,6 +75,19 @@ export class Engine implements ObserverHost {
   getTimings(): { lastCleanMs: number; reconcile: number[] } {
     return { lastCleanMs: this.lastCleanMs, reconcile: [...this.reconcileTimes] };
   }
+
+  /** Document-scope selectors to replay as a pre-paint `<style>` on the next load (§flash). */
+  getPreHideSelectors(): string[] {
+    return [...this.preHide];
+  }
+  private addPreHide(sel: string): void {
+    if (this.preHide.size >= PRE_HIDE_CAP || this.preHide.has(sel)) return;
+    this.preHide.add(sel);
+  }
+  private capturePreHide(el: Element): void {
+    const sel = preHideSelector(el);
+    if (sel) this.addPreHide(sel);
+  }
   private lastEmittedCount = 0;
   private emit(): void {
     this.lastEmittedCount = this.ledger.hiddenCount;
@@ -98,6 +116,12 @@ export class Engine implements ObserverHost {
     for (const el of candidates) this.hideElement(el);
     this.applyUnlock(true);
     this.applyRules(this.rules);
+
+    // Capture pre-paint selectors for the next load (§flash): the heuristic hits plus any
+    // document-scope picked rules. Querying is unaffected by display:none.
+    this.preHide.clear();
+    for (const el of candidates) this.capturePreHide(el);
+    for (const r of this.rules) if (r.hostChain.length === 0) this.addPreHide(r.selector);
 
     // scroll snapshot + branch-B clean-time visual
     this.scrollYAtClean = window.scrollY || window.pageYOffset || 0;
@@ -361,7 +385,10 @@ export class Engine implements ObserverHost {
       const beforeHidden = this.ledger.hiddenCount;
       const newCandidates = this.scanCandidates();
       for (const el of newCandidates) {
-        if (!(this.ledger.hasMarker(el))) this.hideElement(el);
+        if (!this.ledger.hasMarker(el)) {
+          this.hideElement(el);
+          this.capturePreHide(el); // junk that appears after the first clean is pre-hide-worthy too
+        }
       }
       if (this.ledger.hiddenCount !== beforeHidden) didWork = true;
       const hadNeg = !!this.negTopRoot;

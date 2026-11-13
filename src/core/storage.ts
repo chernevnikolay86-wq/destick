@@ -12,13 +12,14 @@ export async function getPrefs(origin: string): Promise<SitePrefs> {
     const k = key(origin);
     const got = await chrome.storage.local.get(k);
     const v = got[k] as SitePrefs | undefined;
-    if (!v) return { ...DEFAULT_PREFS, pickedRules: [] };
+    if (!v) return { ...DEFAULT_PREFS, pickedRules: [], preHideSelectors: [] };
     return {
       autoClean: !!v.autoClean,
       pickedRules: Array.isArray(v.pickedRules) ? v.pickedRules : [],
+      preHideSelectors: Array.isArray(v.preHideSelectors) ? v.preHideSelectors : [],
     };
   } catch {
-    return { ...DEFAULT_PREFS, pickedRules: [] };
+    return { ...DEFAULT_PREFS, pickedRules: [], preHideSelectors: [] };
   }
 }
 
@@ -35,16 +36,35 @@ async function readPrefsStrict(origin: string): Promise<SitePrefs> {
   const k = key(origin);
   const got = await chrome.storage.local.get(k); // may throw → caller must not write
   const v = got[k] as SitePrefs | undefined;
-  if (!v) return { ...DEFAULT_PREFS, pickedRules: [] };
+  if (!v) return { ...DEFAULT_PREFS, pickedRules: [], preHideSelectors: [] };
   return {
     autoClean: !!v.autoClean,
     pickedRules: Array.isArray(v.pickedRules) ? v.pickedRules : [],
+    preHideSelectors: Array.isArray(v.preHideSelectors) ? v.preHideSelectors : [],
   };
 }
 
 export async function setAutoClean(origin: string, autoClean: boolean): Promise<void> {
   const p = await readPrefsStrict(origin); // a read failure aborts, never writes []
   p.autoClean = autoClean;
+  await setPrefs(origin, p);
+}
+
+const PRE_HIDE_CAP = 40;
+
+/**
+ * Persist the sticky clean-state AND the pre-paint hint together (§flash). CLEAN stores
+ * autoClean=true plus the hidden-junk selectors; UNDO clears both. Strict read first so a
+ * transient storage error aborts instead of clobbering the user's saved rules.
+ */
+export async function setCleanState(
+  origin: string,
+  cleaned: boolean,
+  preHideSelectors: string[],
+): Promise<void> {
+  const p = await readPrefsStrict(origin);
+  p.autoClean = cleaned;
+  p.preHideSelectors = cleaned ? preHideSelectors.slice(0, PRE_HIDE_CAP) : [];
   await setPrefs(origin, p);
 }
 
@@ -63,8 +83,8 @@ export async function deleteRule(origin: string, index: number): Promise<void> {
 }
 
 export async function resetSite(origin: string): Promise<void> {
-  // §State model: reset-site clears rules AND turns autoClean off.
-  await setPrefs(origin, { autoClean: false, pickedRules: [] });
+  // §State model: reset-site clears rules AND turns autoClean off (and the pre-hide hint).
+  await setPrefs(origin, { autoClean: false, pickedRules: [], preHideSelectors: [] });
 }
 
 export async function listOrigins(): Promise<{ origin: string; prefs: SitePrefs }[]> {

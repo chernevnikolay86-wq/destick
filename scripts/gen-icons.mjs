@@ -10,8 +10,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 const outDir = resolve(here, '../src/icons');
 mkdirSync(outDir, { recursive: true });
 
-const BG = [0x6d, 0x5e, 0xf3]; // indigo
-const FG = [0xff, 0xff, 0xff]; // white
+const BG = [0x6d, 0x5e, 0xf3]; // indigo — the "on" (active) toolbar icon
+const FG = [0xff, 0xff, 0xff]; // white motif
+const BG_OFF = [0x9c, 0xa3, 0xaf]; // muted slate grey — the "off" (inactive) icon
 
 const crcTable = (() => {
   const t = new Uint32Array(256);
@@ -58,7 +59,7 @@ function png(size, pixels) {
   return Buffer.concat([sig, chunk('IHDR', ihdr), chunk('IDAT', idat), chunk('IEND', Buffer.alloc(0))]);
 }
 
-function render(size) {
+function render(size, bg = BG, fg = FG) {
   const px = new Uint8Array(size * size * 4);
   const s = size;
   const radius = s * 0.22; // rounded corners
@@ -79,13 +80,13 @@ function render(size) {
         px[i] = px[i + 1] = px[i + 2] = px[i + 3] = 0;
         continue;
       }
-      let col = BG;
+      let col = bg;
       const d = Math.hypot(x - cx, y - cy);
       const onRing = Math.abs(d - ringR) <= ringT / 2;
       // diagonal slash (top-left -> bottom-right), clipped to ring interior
       const distToDiag = Math.abs((x - cx) - (y - cy)) / Math.SQRT2;
       const onSlash = distToDiag <= slashT / 2 && d <= ringR + ringT / 2;
-      if (onRing || onSlash) col = FG;
+      if (onRing || onSlash) col = fg;
       px[i] = col[0];
       px[i + 1] = col[1];
       px[i + 2] = col[2];
@@ -96,6 +97,7 @@ function render(size) {
 }
 
 for (const size of [16, 32, 48, 128]) {
-  writeFileSync(resolve(outDir, `icon${size}.png`), png(size, render(size)));
-  console.log(`wrote icon${size}.png`);
+  writeFileSync(resolve(outDir, `icon${size}.png`), png(size, render(size, BG, FG)));
+  writeFileSync(resolve(outDir, `icon${size}-off.png`), png(size, render(size, BG_OFF, FG)));
+  console.log(`wrote icon${size}.png + icon${size}-off.png`);
 }

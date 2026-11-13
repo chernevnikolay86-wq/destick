@@ -9,10 +9,32 @@ import {
   buildRule,
   replayRule,
   fingerprintMatches,
+  preHideSelector,
 } from '../../src/core/fingerprint';
 
 beforeEach(() => {
   document.body.innerHTML = '';
+});
+
+describe('preHideSelector (pre-paint hint, §flash)', () => {
+  it('prefers a unique id', () => {
+    document.body.innerHTML = '<div id="cookie" class="bar">x</div>';
+    expect(preHideSelector(document.getElementById('cookie')!)).toBe('#cookie');
+  });
+  it('falls back to a unique, well-formed class (CMP overlays carry no id)', () => {
+    document.body.innerHTML = '<div class="fc-consent-root">x</div><div class="other">y</div>';
+    const el = document.querySelector('.fc-consent-root')!;
+    expect(preHideSelector(el)).toBe('.fc-consent-root');
+  });
+  it('rejects a class shared by more than one element (not unique)', () => {
+    document.body.innerHTML = '<div class="dup a">x</div><div class="dup b">y</div>';
+    // "dup" is not unique; "a"/"b" are < 3 chars → no stable selector
+    expect(preHideSelector(document.querySelector('.dup')!)).toBeNull();
+  });
+  it('rejects short/garbage class tokens', () => {
+    document.body.innerHTML = '<div class="ab x1">x</div>';
+    expect(preHideSelector(document.querySelector('.ab')!)).toBeNull();
+  });
 });
 
 describe('fingerprint primitives', () => {

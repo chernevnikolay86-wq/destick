@@ -24,9 +24,15 @@ export interface Rule {
 export interface SitePrefs {
   autoClean: boolean;
   pickedRules: Rule[];
+  /**
+   * Document-scope selectors of the junk hidden on the last clean, replayed as a
+   * pre-paint `<style>` on the next load so remembered junk never flashes (§flash).
+   * Best-effort hint only; the engine stays the live source of truth.
+   */
+  preHideSelectors?: string[];
 }
 
-export const DEFAULT_PREFS: SitePrefs = { autoClean: false, pickedRules: [] };
+export const DEFAULT_PREFS: SitePrefs = { autoClean: false, pickedRules: [], preHideSelectors: [] };
 
 export type CleanState = 'off' | 'cleaned';
 
