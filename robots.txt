@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chernevnikolay86-wq.github.io/destick/sitemap.xml

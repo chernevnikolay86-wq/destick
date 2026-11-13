@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Destick — One click. The sticky junk is gone.</title>
+  <meta name="description" content="Destick removes the sticky junk — cookie walls, sticky headers, newsletter modals, chat bubbles, overlays — with one click, and gives you back the page. Reversible, per-site, 100% local. Open source, MIT." />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0d0b1f" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="canonical" href="https://chernevnikolay86-wq.github.io/destick/" />
+
+  <!-- Social preview -->
+  <meta property="og:title" content="Destick — One click. The sticky junk is gone." />
+  <meta property="og:description" content="Cookie walls, sticky headers, modals, chat bubbles, overlays — removed with one click. Scrolling comes back. Reversible, per-site, 100% local. Open source." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://chernevnikolay86-wq.github.io/destick/" />
+  <meta property="og:site_name" content="Destick" />
+  <meta property="og:image" content="https://chernevnikolay86-wq.github.io/destick/assets/og-image.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Destick — One click. The sticky junk is gone." />
+  <meta name="twitter:description" content="Remove cookie walls, sticky headers, modals and overlays with one click. Reversible, per-site, 100% local. Open source, MIT." />
+  <meta name="twitter:image" content="https://chernevnikolay86-wq.github.io/destick/assets/og-image.svg" />
+  <meta name="keywords" content="remove sticky header, hide cookie banner, close newsletter popup, kill sticky, chrome extension, remove overlay, disable ad blocker wall, cookie wall remover, open source, privacy, manifest v3" />
+
+  <!-- Structured data: the app + FAQ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "Destick — Kill Sticky",
+        "applicationCategory": "BrowserApplication",
+        "operatingSystem": "Chrome",
+        "description": "Destick removes sticky headers, cookie bars, modals, chat bubbles and overlays with one click and restores scrolling. Reversible, per-site, 100% local. Open source, MIT.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "license": "https://opensource.org/licenses/MIT",
+        "url": "https://chernevnikolay86-wq.github.io/destick/",
+        "softwareVersion": "0.1.0"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is Destick really 100% local?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Destick makes no outbound request and sends no data anywhere. Your per-site choices live only on your device in chrome.storage.local — no account, no sync. The no-network claim is enforced in CI." }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I undo it?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Click again (or press Alt+Shift+X) to undo, with no page reload. Destick records exactly what it changed in a ledger and restores only its own changes." }
+          },
+          {
+            "@type": "Question",
+            "name": "Is it free and open source?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Destick is free and open source under the MIT license. The full code is on GitHub and you can audit it." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --indigo: #6d5ef3;
+      --indigo-bright: #8878ff;
+      --bg: #0d0b1f;
+      --bg-2: #141130;
+      --panel: #1a1640;
+      --panel-2: #211c4d;
+      --ink: #f5f3ff;
+      --muted: #a79fd6;
+      --dim: #7d75b0;
+      --green: #16a34a;
+      --grey: #6b7280;
+      --amber: #d97706;
+      --line: #2c2663;
+      --radius: 16px;
+      --maxw: 1080px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at 50% -10%, #1b1540 0%, var(--bg) 55%) no-repeat, var(--bg);
+      color: var(--ink);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--indigo-bright); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 20px; }
+
+    .skip { position: absolute; left: -999px; top: 0; background: var(--indigo); color: #fff; padding: 10px 16px; border-radius: 8px; z-index: 100; }
+    .skip:focus { left: 12px; top: 12px; }
+
+    /* nav */
+    header.nav { position: sticky; top: 0; z-index: 40; backdrop-filter: blur(10px); background: rgba(13,11,31,.72); border-bottom: 1px solid var(--line); }
+    .nav-in { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; max-width: var(--maxw); margin: 0 auto; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.1rem; color: var(--ink); }
+    .brand img { width: 28px; height: 28px; border-radius: 7px; }
+    .nav-links { display: flex; align-items: center; gap: 18px; }
+    .nav-links a.txt { color: var(--muted); font-weight: 500; font-size: .95rem; }
+    .nav-links a.txt:hover { color: var(--ink); text-decoration: none; }
+
+    /* buttons */
+    .btn { display: inline-flex; align-items: center; gap: 9px; font-weight: 700; font-size: 1rem; padding: 13px 22px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; transition: transform .08s ease, background .15s ease, border-color .15s; white-space: nowrap; }
+    .btn:hover { text-decoration: none; transform: translateY(-1px); }
+    .btn-primary { background: var(--indigo); color: #fff; box-shadow: 0 8px 26px -10px var(--indigo); }
+    .btn-primary:hover { background: var(--indigo-bright); }
+    .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+    .btn-ghost:hover { border-color: var(--indigo-bright); background: rgba(109,94,243,.1); }
+    .btn-sm { padding: 9px 16px; font-size: .92rem; }
+
+    /* hero */
+    .hero { padding: 64px 0 36px; text-align: center; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: .85rem; font-weight: 600; color: var(--indigo-bright); background: rgba(109,94,243,.12); border: 1px solid var(--line); padding: 6px 14px; border-radius: 999px; margin-bottom: 22px; }
+    h1 { font-size: clamp(2.1rem, 6vw, 3.9rem); line-height: 1.05; font-weight: 800; letter-spacing: -.02em; margin: 0 0 18px; }
+    h1 .grad { background: linear-gradient(90deg, #fff, var(--indigo-bright)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .sub { font-size: clamp(1.05rem, 2.4vw, 1.3rem); color: var(--muted); max-width: 680px; margin: 0 auto 30px; }
+    .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .cta-note { margin-top: 16px; font-size: .9rem; color: var(--dim); }
+    .cta-note strong { color: var(--muted); }
+    .micro { margin-top: 10px; font-size: .88rem; color: var(--dim); display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .micro span { display: inline-flex; align-items: center; gap: 6px; }
+
+    /* demo */
+    .demo { margin: 40px auto 0; max-width: 820px; }
+    .demo-frame { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: #000; box-shadow: 0 30px 80px -30px rgba(0,0,0,.8); }
+    .demo-frame video, .demo-frame img { display: block; width: 100%; height: auto; }
+    .demo-cap { text-align: center; color: var(--dim); font-size: .85rem; margin-top: 10px; }
+
+    /* sections */
+    section { padding: 56px 0; border-top: 1px solid var(--line); }
+    .sec-head { text-align: center; max-width: 640px; margin: 0 auto 40px; }
+    h2 { font-size: clamp(1.6rem, 3.6vw, 2.4rem); font-weight: 800; letter-spacing: -.01em; margin: 0 0 12px; }
+    .sec-head p { color: var(--muted); font-size: 1.08rem; margin: 0; }
+
+    /* problem chips */
+    .chips { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; max-width: 780px; margin: 0 auto; }
+    .chip { display: inline-flex; align-items: center; gap: 9px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; font-size: .97rem; color: var(--ink); }
+    .chip .x { color: #ff6b8a; font-weight: 800; }
+
+    /* feature grid */
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card { background: linear-gradient(180deg, var(--panel), var(--bg-2)); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+    .card .ico { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px; background: rgba(109,94,243,.14); border: 1px solid var(--line); margin-bottom: 14px; }
+    .card h3 { margin: 0 0 7px; font-size: 1.12rem; }
+    .card p { margin: 0; color: var(--muted); font-size: .96rem; }
+    kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .82em; background: #0c0a22; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 2px 7px; color: var(--ink); }
+
+    /* badge legend */
+    .legend { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+    .legend .it { display: inline-flex; align-items: center; gap: 9px; color: var(--muted); font-size: .95rem; }
+    .dot { width: 14px; height: 14px; border-radius: 4px; }
+
+    /* privacy */
+    .privacy { background: linear-gradient(180deg, rgba(22,163,74,.07), transparent); }
+    .privacy-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 34px; max-width: 820px; margin: 0 auto; }
+    .privacy-list { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 12px; }
+    .privacy-list li { display: flex; gap: 12px; align-items: flex-start; color: var(--muted); }
+    .privacy-list .ok { color: var(--green); font-weight: 800; flex: 0 0 auto; }
+    .privacy-list strong { color: var(--ink); }
+
+    /* oss banner */
+    .oss { text-align: center; }
+    .oss .btn { margin-top: 6px; }
+
+    /* faq */
+    details.faq { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+    details.faq summary { cursor: pointer; padding: 18px 20px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    details.faq summary::-webkit-details-marker { display: none; }
+    details.faq summary::after { content: "+"; color: var(--indigo-bright); font-size: 1.4rem; line-height: 1; }
+    details.faq[open] summary::after { content: "–"; }
+    details.faq .ans { padding: 0 20px 18px; color: var(--muted); }
+    .faq-wrap { max-width: 760px; margin: 0 auto; }
+
+    /* final cta */
+    .final { text-align: center; }
+    .final-card { background: linear-gradient(135deg, #251e5f, #15123a); border: 1px solid var(--line); border-radius: 22px; padding: 48px 24px; max-width: 820px; margin: 0 auto; }
+
+    /* footer */
+    footer { border-top: 1px solid var(--line); padding: 32px 0 46px; color: var(--dim); }
+    .foot-in { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .foot-links { display: flex; gap: 20px; flex-wrap: wrap; }
+    .foot-links a { color: var(--muted); font-size: .94rem; }
+
+    @media (max-width: 820px) {
+      .grid { grid-template-columns: 1fr; }
+      .nav-links a.txt { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .btn:hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-in">
+      <a class="brand" href="#top" aria-label="Destick home">
+        <img src="assets/icon128.png" alt="" width="28" height="28" />
+        Destick
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="txt" href="#how">How it works</a>
+        <a class="txt" href="#privacy">Privacy</a>
+        <a class="txt" href="#faq">FAQ</a>
+        <a class="btn btn-ghost btn-sm" id="nav-github" href="https://github.com/chernevnikolay86-wq/destick" target="_blank" rel="noopener">
+          ⭐ Star on GitHub
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <a id="top"></a>
+    <!-- HERO -->
+    <div class="hero wrap">
+      <span class="eyebrow">Open source · Manifest V3 · 100% local</span>
+      <h1>One click.<br /><span class="grad">The sticky junk is gone.</span></h1>
+      <p class="sub">
+        Cookie walls, sticky headers, newsletter modals, floating chat bubbles,
+        full-screen "disable your ad blocker" overlays — removed with one click.
+        Scrolling comes back. Click again to undo.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" id="cta-primary" href="https://github.com/chernevnikolay86-wq/destick" target="_blank" rel="noopener">
+          ⭐ Star it on GitHub
+        </a>
+        <a class="btn btn-ghost" id="cta-store" href="https://github.com/chernevnikolay86-wq/destick#install-unpacked-while-in-review" target="_blank" rel="noopener">
+          Add to Chrome
+        </a>
+      </div>
+      <p class="cta-note" id="prelaunch-note">
+        <strong>Not on the Chrome Web Store yet</strong> — the listing is coming soon.
+        For now, star the repo to follow along, or install it unpacked from GitHub.
+      </p>
+      <div class="micro" aria-hidden="true">
+        <span>✓ Free</span>
+        <span>✓ Open source (MIT)</span>
+        <span>✓ 100% local</span>
+        <span>✓ No account</span>
+      </div>
+
+      <div class="demo">
+        <div class="demo-frame">
+          <video autoplay loop muted playsinline poster="assets/demo.gif" aria-label="Destick demo: one click removes sticky headers, cookie bars and modals, and restores scrolling">
+            <source src="assets/demo.mp4" type="video/mp4" />
+            <img src="assets/demo.gif" alt="Destick before/after demo: one click removes sticky headers, cookie bars and modals and restores scrolling" />
+          </video>
+        </div>
+        <p class="demo-cap">Before → one click → the junk is gone and scrolling is back.</p>
+      </div>
+    </div>
+
+    <!-- PROBLEM -->
+    <section id="problem">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>You know the junk</h2>
+          <p>Half your screen eaten by things you never asked for. Destick deletes all of it in one click.</p>
+        </div>
+        <div class="chips">
+          <span class="chip"><span class="x">✕</span> "We value your privacy" cookie walls</span>
+          <span class="chip"><span class="x">✕</span> Sticky headers that eat half the screen</span>
+          <span class="chip"><span class="x">✕</span> Newsletter pop-ups on the 10th second</span>
+          <span class="chip"><span class="x">✕</span> "Please disable your ad blocker" overlays</span>
+          <span class="chip"><span class="x">✕</span> Floating "Hi! 👋" chat bubbles</span>
+          <span class="chip"><span class="x">✕</span> Social-share rails glued to the side</span>
+          <span class="chip"><span class="x">✕</span> Scroll-jacking overlays that lock the page</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>How it works</h2>
+          <p>One toolbar click or a keyboard shortcut. No filter syntax, no account, no setup.</p>
+        </div>
+        <div class="grid">
+          <div class="card">
+            <div class="ico" aria-hidden="true">🧹</div>
+            <h3>Click → gone</h3>
+            <p>Hides sticky &amp; fixed bars and any overlay covering most of the viewport — and unlocks scrolling that pages lock behind modals.</p>
+          </div>
+          <div class="card">
+            <div class="ico" aria-hidden="true">↩️</div>
+            <h3>Reversible undo</h3>
+            <p>Click again to undo — no page reload. Destick records exactly what it changed and restores only that, never your interactions.</p>
+          </div>
+          <div class="card">
+            <div class="ico" aria-hidden="true">📌</div>
+            <h3>Per-site memory</h3>
+            <p>Clean a site once and it stays clean on your next visits, automatically. Turn auto-clean off per site whenever you want.</p>
+          </div>
+          <div class="card">
+            <div class="ico" aria-hidden="true">🟢</div>
+            <h3>ON / OFF badge</h3>
+            <p>The toolbar icon tells you at a glance whether Destick is active here, and how many things it hid on this page.</p>
+          </div>
+          <div class="card">
+            <div class="ico" aria-hidden="true">🎯</div>
+            <h3>Element picker</h3>
+            <p>For stubborn junk, press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and point at the element. No CSS selectors to learn.</p>
+          </div>
+          <div class="card">
+            <div class="ico" aria-hidden="true">⌨️</div>
+            <h3>Shortcuts + late junk</h3>
+            <p><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> cleans or undoes. A watcher re-hides modals and overlays that appear after the page loads.</p>
+          </div>
+        </div>
+        <div class="legend" aria-label="Badge colors">
+          <span class="it"><span class="dot" style="background:var(--green)"></span> Green — cleaned / active</span>
+          <span class="it"><span class="dot" style="background:var(--grey)"></span> Grey — off for this site</span>
+          <span class="it"><span class="dot" style="background:var(--amber)"></span> Amber ⏸ — auto-clean paused</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRIVACY -->
+    <section id="privacy" class="privacy">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>It never phones home</h2>
+          <p>Most "cleaner" extensions ask for the keys to your whole browsing life. Destick asks for nothing.</p>
+        </div>
+        <div class="privacy-card">
+          <ul class="privacy-list">
+            <li><span class="ok">✓</span> <span><strong>No outbound request. No data sent anywhere.</strong> Destick initiates zero network traffic — and that claim is enforced in CI with a real runtime check.</span></li>
+            <li><span class="ok">✓</span> <span><strong>No account, no sync.</strong> Your per-site choices and picked elements live only on this device, in local storage.</span></li>
+            <li><span class="ok">✓</span> <span><strong>Only the "storage" permission.</strong> It runs on page load so it can hide junk before you see it — but it never sends anything out.</span></li>
+            <li><span class="ok">✓</span> <span><strong>Auditable.</strong> The whole extension is open source under MIT. Read every line, or build it yourself.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- OPEN SOURCE -->
+    <section id="oss" class="oss">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Free, forever, and open</h2>
+          <p>Destick is MIT-licensed and built in the open. Bug reports, tricky sites and new fixtures are especially welcome.</p>
+        </div>
+        <a class="btn btn-ghost" href="https://github.com/chernevnikolay86-wq/destick" target="_blank" rel="noopener">View the source on GitHub →</a>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Honest answers</h2>
+          <p>Including what Destick does <em>not</em> do — because that's how you know the rest is true.</p>
+        </div>
+        <div class="faq-wrap">
+          <details class="faq" open>
+            <summary>Is it really 100% local?</summary>
+            <div class="ans">Yes. Destick makes no outbound request and transmits no data anywhere. Your choices live only on your device in <code>chrome.storage.local</code> — no account, no <code>.sync</code>. The "no network" claim is checked in CI with a positive control that proves the monitor actually catches a request.</div>
+          </details>
+          <details class="faq">
+            <summary>Can I undo it if it hides too much?</summary>
+            <div class="ans">Yes — that's the whole point. Click the icon again or press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> to undo, with no reload. Destick is aggressive by design, so it can occasionally hide a legitimate nav bar; undo, the element picker, or turning off auto-clean for that site are the corrections.</div>
+          </details>
+          <details class="faq">
+            <summary>Does it block ads or give cookie consent for me?</summary>
+            <div class="ans">No. Destick is not an ad blocker and it doesn't answer consent prompts for you. It removes the <em>layout</em> junk — sticky bars, modals, overlays — and gives you back scrolling. Hiding an element stops it blocking your clicks, but doesn't stop its scripts or network.</div>
+          </details>
+          <details class="faq">
+            <summary>What can't it clean (yet)?</summary>
+            <div class="ans">This MVP works on the top document, open shadow roots, and <code>&lt;iframe&gt;</code> elements used as overlays. It does not clean <em>inside</em> iframes, closed shadow roots are handled at host level only, native <code>&lt;dialog&gt;</code> modals may stay inert behind the scenes, and SPA route changes with no DOM mutation aren't caught. Firefox isn't supported yet.</div>
+          </details>
+          <details class="faq">
+            <summary>How do I install it today?</summary>
+            <div class="ans">The Chrome Web Store listing is coming soon. For now you can install it unpacked: clone the repo, run <code>npm install &amp;&amp; npm run build</code>, then load the <code>dist/</code> folder at <code>chrome://extensions</code> with Developer mode on. Full steps are in the GitHub README.</div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="final">
+      <div class="wrap">
+        <div class="final-card">
+          <h2>Get your pages back.</h2>
+          <p class="sub" style="margin-bottom:26px">Star it to follow the launch, or try it unpacked today. The Web Store button goes live the moment the listing does.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" id="cta-primary-2" href="https://github.com/chernevnikolay86-wq/destick" target="_blank" rel="noopener">⭐ Star it on GitHub</a>
+            <a class="btn btn-ghost" href="https://www.youtube.com/@getdestick" target="_blank" rel="noopener">▶ Watch it in action</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-in">
+      <div class="brand">
+        <img src="assets/icon128.png" alt="" width="24" height="24" style="border-radius:6px" />
+        Destick — Kill Sticky
+      </div>
+      <div class="foot-links">
+        <a href="https://github.com/chernevnikolay86-wq/destick" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.youtube.com/@getdestick" target="_blank" rel="noopener">YouTube</a>
+        <a href="https://github.com/chernevnikolay86-wq/destick/issues" target="_blank" rel="noopener">Report a site</a>
+        <a href="https://github.com/chernevnikolay86-wq/destick/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* =====================================================================
+       WEB STORE CTA — single switch.
+       Destick is NOT on the Chrome Web Store yet. While it isn't, the
+       "Add to Chrome" button points to GitHub and the page shows a
+       "coming soon" note.
+       When the listing is live: paste the Web Store URL below (that one
+       line is all you change) and the button becomes a real "Add to
+       Chrome" store link, primary-styled, and the note disappears.
+       ===================================================================== */
+    var WEB_STORE_URL = ""; // e.g. "https://chromewebstore.google.com/detail/<id>"
+
+    (function () {
+      if (!WEB_STORE_URL) return; // prelaunch: leave the truthful default state
+      var store = document.getElementById("cta-store");
+      if (store) {
+        store.href = WEB_STORE_URL;
+        store.target = "_blank";
+        store.rel = "noopener";
+        store.textContent = "Add to Chrome — it's free";
+        store.classList.remove("btn-ghost");
+        store.classList.add("btn-primary");
+      }
+      var note = document.getElementById("prelaunch-note");
+      if (note) note.style.display = "none";
+    })();
+  </script>
+</body>
+</html>
