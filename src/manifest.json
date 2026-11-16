@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Destick — Kill Sticky",
+  "name": "Destick — Cookie Banner & Sticky Header Remover",
   "version": "0.1.0",
   "description": "One click hides sticky headers, cookie bars, modals, chat bubbles and overlays — and restores scrolling. Reversible, per-site, 100% local.",
   "icons": {
